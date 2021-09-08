@@ -1,8 +1,7 @@
-/*
-import firebase from 'firebase';
-import 'firebase/firestore';
-import 'firebase/auth';
-
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import 'firebase/compat/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const config = {
 	apiKey: 'AIzaSyDnoLQZrwkSgAdVQ8C65-Unb2tdu0yhKHg',
@@ -14,23 +13,46 @@ const config = {
 	measurementId: 'G-7HR43LC0ML',
 };
 
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+	if (!userAuth) {
+		return;
+	}
+	const userRef = firestore.doc(`users/${userAuth.uid}`);
+	const snapShot = await userRef.get();
+
+	if (!snapShot.exists) {
+		const { displayName, email } = userAuth;
+		const createdAt = new Date();
+
+		try {
+			await userRef.set({
+				displayName,
+				email,
+				createdAt,
+				...additionalData,
+			});
+		} catch (error) {
+			console.log(`Error creating user: ${error.message}`);
+		}
+	}
+
+	return userRef;
+};
 
 firebase.initializeApp(config);
 
-export const auth = firebase.auth();
+export const auth = getAuth();
 export const firestore = firebase.firestore();
 
-const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'Select_Account' });
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ params: 'select_account' });
+export const signInWithGoogle = () => signInWithPopup(auth, provider);
 
-export const signInWithGoogle = () => {
-	return auth.signInWithPopup(provider);
-};
-*/
-
+/*
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -52,6 +74,14 @@ initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const firestore = getFirestore();
 
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+	if (!userAuth) {
+		return;
+	}
+	console.log(firestore.doc('users/123lsjlkds'));
+};
+
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ params: 'select_account' });
 export const signInWithGoogle = () => signInWithPopup(auth, provider);
+*/
